@@ -10,7 +10,7 @@ Thanks for helping. Bug reports, questions, documentation fixes and code are all
 
 ## Development setup
 
-- macOS 14 or later and Go 1.22 or later. `brew install go golangci-lint` covers the tooling.
+- macOS 14 or later and Go 1.26 or later. `brew install go golangci-lint` covers the tooling.
 - `make build` builds `./aisomnia`; `make install` puts it in `~/.local/bin`.
 - `make test` runs the unit tests and `go vet`. The tests never execute `pmset`, `defaults`, `sysadminctl`, `ioreg`, `launchctl` or `caffeinate`: all process calls go through the `Runner` interface in `macos.go`, and the tests inject a fake. Keep it that way.
 - `make lint` runs golangci-lint with the repository configuration. `make vuln` runs govulncheck.

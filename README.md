@@ -40,7 +40,7 @@ Homebrew tap (macOS 14 or later, Apple silicon and Intel):
 brew install lidow/tap/aisomnia
 ```
 
-From source (Go 1.22 or later):
+From source (Go 1.26 or later):
 
 ```sh
 go install github.com/lidow/aisomnia@latest
