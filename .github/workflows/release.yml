@@ -54,6 +54,10 @@ jobs:
           if [ -z "$pr" ]; then echo "no pending release pull request"; exit 0; fi
           set -- $pr
           PR=$1 BRANCH=$2
+          # Bring the release branch up to date first: workflow_dispatch reads ci.yml from that branch,
+          # and the checks must run against what main holds now.
+          gh pr update-branch "$PR" --rebase || true
+          sleep 5
           # main requires CI; a pull request opened with the workflow token gets none, so start it here.
           gh workflow run ci.yml --ref "$BRANCH"
           for _ in $(seq 1 60); do
