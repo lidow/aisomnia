@@ -12,13 +12,14 @@ Thanks for helping. Bug reports, questions, documentation fixes and code are all
 
 - macOS 14 or later and Go 1.26 or later. `brew install go golangci-lint` covers the tooling.
 - `make build` builds `./aisomnia`; `make install` puts it in `~/.local/bin`.
-- `make test` runs the unit tests and `go vet`. The tests never execute `pmset`, `defaults`, `sysadminctl`, `ioreg`, `launchctl` or `caffeinate`: all process calls go through the `Runner` interface in `macos.go`, and the tests inject a fake. Keep it that way.
+- `make test` runs the unit tests and `go vet`. The tests never execute `pmset`, `defaults`, `sysadminctl`, `ioreg`, `launchctl` or `caffeinate`: all process calls go through `macos.Runner` (`internal/macos`), and the tests inject `macostest.Fake`. Recorded command output lives in `internal/macos/testdata/`. Keep it that way.
+- The code layout is described in the README → Development. New behavior goes into the package that owns it, with its tests beside it; `internal/cli` only parses arguments and wires packages together.
 - `make lint` runs golangci-lint with the repository configuration. `make vuln` runs govulncheck.
 
 ## Pull requests
 
-1. Fork, create a branch from `main`.
-2. Add or update tests for what you change. A new macOS command gets a parser test and an ordering test in `aisomnia_test.go`.
+1. Fork, create a branch from `main`. `main` is protected: changes arrive only through pull requests with green CI (tests on two macOS versions, golangci-lint, govulncheck), squash-merged.
+2. Add or update tests for what you change. A new macOS command gets a parser test and an ordering test in `internal/engine`; recorded command output goes to `internal/macos/testdata/`.
 3. Run `make check` (format, vet, lint, test) locally.
 4. Use a Conventional Commit title (`feat:`, `fix:`, `docs:` …): the changelog and the version come from it ([docs/releasing.md](docs/releasing.md)).
 5. Open the pull request against `main`. The template asks what you tested on which macOS version; please fill it in, because CI cannot press a power button.

@@ -1,0 +1,8 @@
+gui/501/dev.aisomnia.lidwatch = {
+	active count = 1
+	path = /x
+	state = running
+
+	program = /x
+	pid = 4242
+}

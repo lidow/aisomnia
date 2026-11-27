@@ -1,22 +1,29 @@
-package main
+// Package profile declares the power profile: pmset values per power source, the power-button
+// keys, the screen saver and lock, and the lid watcher. Two profiles are embedded: the default
+// one aisomnia applies and the macOS baseline that reset restores.
+package profile
 
 import (
 	_ "embed"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 
 	"github.com/BurntSushi/toml"
 )
 
-//go:embed profile.toml
-var profileTOML string
+//go:embed profiles/default.toml
+var defaultTOML string
 
-//go:embed profile_defaults.toml
-var defaultsTOML string
+//go:embed profiles/baseline.toml
+var baselineTOML string
 
-// Profile is the declared power profile. Pointer fields in PowerButton are "absent" when
-// nil, which means the key must not exist on the Mac (reset deletes it).
+// DefaultTOML is the text of the built-in profile; `aisomnia profile --init` writes it out.
+func DefaultTOML() string { return defaultTOML }
+
+// Profile is the declared power profile. Pointer fields in PowerButton are "absent" when nil,
+// which means the key must not exist on the Mac (reset deletes it).
 type Profile struct {
 	Name  string `toml:"name"`
 	Pmset struct {
@@ -40,7 +47,8 @@ type Profile struct {
 	Source string `toml:"-"` // the TOML text the profile was parsed from
 }
 
-func parseProfile(text string) (*Profile, error) {
+// Parse reads a profile; unknown keys are an error so a typo cannot silently do nothing.
+func Parse(text string) (*Profile, error) {
 	var p Profile
 	md, err := toml.Decode(text, &p)
 	if err != nil {
@@ -65,26 +73,61 @@ func parseProfile(text string) (*Profile, error) {
 	return &p, nil
 }
 
-// loadProfile returns the embedded profile, or the one at path when given.
-func loadProfile(path string) (*Profile, error) {
+// Default returns the built-in profile.
+func Default() (*Profile, error) { return Parse(defaultTOML) }
+
+// Baseline returns the macOS baseline that reset restores.
+func Baseline() (*Profile, error) { return Parse(baselineTOML) }
+
+// Load returns the profile at path, or the built-in one when path is "".
+func Load(path string) (*Profile, error) {
 	if path == "" {
-		return parseProfile(profileTOML)
+		return Default()
 	}
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("profile %s: %w", path, err)
 	}
-	p, err := parseProfile(string(b))
+	p, err := Parse(string(b))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 	return p, nil
 }
 
+// UserPath is where `aisomnia profile --init` writes the editable copy.
+func UserPath(home string) string {
+	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
+		return filepath.Join(xdg, "aisomnia", "profile.toml")
+	}
+	return filepath.Join(home, ".config", "aisomnia", "profile.toml")
+}
+
+// ResolvePath picks the profile: the --profile flag, then AISOMNIA_PROFILE, then the user copy when
+// it exists, else "" for the built-in profile.
+func ResolvePath(flag, env, home string) string {
+	if flag != "" {
+		return flag
+	}
+	if env != "" {
+		return env
+	}
+	if p := UserPath(home); fileExists(p) {
+		return p
+	}
+	return ""
+}
+
+func fileExists(p string) bool {
+	st, err := os.Stat(p)
+	return err == nil && !st.IsDir()
+}
+
 // pmsetOrder is the order pmset keys are listed and applied; keys not listed follow, sorted.
 var pmsetOrder = []string{"sleep", "displaysleep", "disksleep", "tcpkeepalive", "womp", "lidwake", "powernap", "standby", "hibernatemode"}
 
-func orderedKeys(m map[string]int) []string {
+// OrderedKeys returns the keys of a pmset map in apply order.
+func OrderedKeys(m map[string]int) []string {
 	seen := map[string]bool{}
 	var keys []string
 	for _, k := range pmsetOrder {

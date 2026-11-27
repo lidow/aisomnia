@@ -9,7 +9,7 @@ before:
 
 builds:
   - id: aisomnia
-    main: .
+    main: ./cmd/aisomnia
     binary: aisomnia
     env: [CGO_ENABLED=0]
     goos: [darwin]

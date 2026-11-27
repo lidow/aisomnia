@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # The release workflow dispatches CI on its release branch: pull requests opened by the workflow
+  # token get no CI otherwise, and main requires these checks before a merge.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,7 +31,7 @@ jobs:
       - name: Test
         run: go test -race -count=1 ./...
       - name: Build
-        run: go build -o aisomnia . && ./aisomnia version
+        run: go build -o aisomnia ./cmd/aisomnia && ./aisomnia version
 
   lint:
     name: golangci-lint

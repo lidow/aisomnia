@@ -1,5 +1,7 @@
 # aisomnia
 
+*Pronounced /eɪˈsɒm.ni.ə/, "ay-SOM-nee-uh": AI + insomnia.*
+
 **Keep your Mac awake for the work, locked for compliance, asleep when the lid closes.**
 
 `aisomnia` is a small macOS command-line tool for people who run long jobs on a laptop: AI coding agents, builds, test suites, syncs, remote sessions. It declares your power, lock and lid behavior in one file, applies it with one command, and tells you when the Mac has drifted from it.
@@ -43,7 +45,7 @@ brew install lidow/tap/aisomnia
 From source (Go 1.26 or later):
 
 ```sh
-go install github.com/lidow/aisomnia@latest
+go install github.com/lidow/aisomnia/cmd/aisomnia@latest
 ```
 
 Or clone the repository and run `make install`, which builds into `~/.local/bin`.
@@ -134,7 +136,18 @@ make vuln     # govulncheck
 make build    # ./aisomnia
 ```
 
-Unit tests never touch macOS: every command runs through one `Runner` interface and the tests inject a fake. See [CONTRIBUTING.md](CONTRIBUTING.md). Releases are automatic: Conventional Commits on `main` drive the version and the changelog, and GitHub Actions publishes the release and updates the Homebrew formula. See [docs/releasing.md](docs/releasing.md).
+Unit tests never touch macOS: every command runs through the `macos.Runner` interface and the tests inject `macostest.Fake`.
+
+```
+cmd/aisomnia/          entry point: version stamp, hands off to internal/cli
+internal/cli/          arguments, verbs, paths under your home; wires the packages below
+internal/profile/      profile model; profiles/default.toml and profiles/baseline.toml (embedded)
+internal/macos/        Runner, parsers for pmset, defaults, sysadminctl, ioreg, launchctl; testdata/
+internal/engine/       drift assessment and the ordered commands of apply and reset
+internal/hold/         one-time holds and the root helper behind lid and standby holds
+internal/lidwatch/     clamshell watcher and its launchd agent (template embedded)
+internal/power/        lock, sleep, scheduled wake, hibernate
+``` See [CONTRIBUTING.md](CONTRIBUTING.md). Releases are automatic: Conventional Commits on `main` drive the version and the changelog, and GitHub Actions publishes the release and updates the Homebrew formula. See [docs/releasing.md](docs/releasing.md).
 
 ## License
 

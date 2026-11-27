@@ -4,9 +4,9 @@ name: Release
 # 1. Runs after CI succeeds on main (or weekly, or by hand).
 # 2. release-please reads the Conventional Commits since the last tag and opens or updates the
 #    release pull request (next version + CHANGELOG.md).
-# 3. With the repository variable AUTO_RELEASE = "true" the workflow merges that pull request itself
-#    and release-please creates the tag and the GitHub release in the same run; otherwise merging the
-#    release pull request by hand does it.
+# 3. With the repository variable AUTO_RELEASE = "true" the workflow starts CI on the release branch,
+#    waits for the checks main requires, merges the pull request, and release-please creates the tag
+#    and the GitHub release in the same run; otherwise merging the release pull request by hand does it.
 # 4. GoReleaser builds darwin/arm64 + darwin/amd64, attaches archives and checksums to the release and
 #    pushes the Homebrew formula to lidow/homebrew-tap with a deploy key (secret HOMEBREW_TAP_DEPLOY_KEY).
 
@@ -20,6 +20,8 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write        # dispatch CI on the release branch
+  checks: read
   contents: write
   pull-requests: write
 
@@ -41,11 +43,22 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
       - id: merge
-        if: vars.AUTO_RELEASE == 'true' && steps.first.outputs.prs_created == 'true'
+        if: vars.AUTO_RELEASE == 'true' && steps.first.outputs.pr != ''
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           PR: ${{ fromJSON(steps.first.outputs.pr).number }}
-        run: gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+          BRANCH: ${{ fromJSON(steps.first.outputs.pr).headBranchName }}
+        run: |
+          # main requires CI; a pull request opened with the workflow token gets none, so start it here.
+          gh workflow run ci.yml --ref "$BRANCH"
+          for _ in $(seq 1 60); do
+            n=$(gh pr checks "$PR" --required --json name -q 'length' 2>/dev/null || echo 0)
+            [ "${n:-0}" -ge 4 ] && break
+            sleep 10
+          done
+          gh pr checks "$PR" --required --watch --fail-fast --interval 15
+          gh pr merge "$PR" --squash --delete-branch
       - id: second
         if: steps.merge.outcome == 'success'
         uses: googleapis/release-please-action@v5
