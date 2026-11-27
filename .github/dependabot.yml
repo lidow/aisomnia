@@ -7,7 +7,7 @@ updates:
       day: monday
     labels: [dependencies, go]
     commit-message:
-      prefix: "chore(deps)"
+      prefix: "fix(deps)"   # a Go dependency update is a patch release
     groups:
       go-minor-patch:
         update-types: [minor, patch]

@@ -30,20 +30,15 @@ archives:
 checksum:
   name_template: checksums.txt
 
+# Release notes come from release-please (CHANGELOG.md); GoReleaser only attaches the artifacts.
 changelog:
-  use: github
-  sort: asc
-  filters:
-    exclude:
-      - "^chore\\(deps\\)"
-      - "^chore\\(ci\\)"
-      - "^docs:"
-      - "^test:"
+  disable: true
 
 release:
   github:
     owner: lidow
     name: aisomnia
+  mode: keep-existing
   draft: false
   prerelease: auto
 
@@ -53,7 +48,9 @@ brews:
       owner: lidow
       name: homebrew-tap
       branch: main
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+      git:
+        url: "git@github.com:lidow/homebrew-tap.git"
+        private_key: "{{ .Env.HOMEBREW_TAP_DEPLOY_KEY }}"
     directory: Formula
     commit_author:
       name: aisomnia-release-bot

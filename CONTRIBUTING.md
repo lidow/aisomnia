@@ -20,10 +20,10 @@ Thanks for helping. Bug reports, questions, documentation fixes and code are all
 1. Fork, create a branch from `main`.
 2. Add or update tests for what you change. A new macOS command gets a parser test and an ordering test in `aisomnia_test.go`.
 3. Run `make check` (format, vet, lint, test) locally.
-4. Add a line under `Unreleased` in `CHANGELOG.md`.
+4. Use a Conventional Commit title (`feat:`, `fix:`, `docs:` …): the changelog and the version come from it ([docs/releasing.md](docs/releasing.md)).
 5. Open the pull request against `main`. The template asks what you tested on which macOS version; please fill it in, because CI cannot press a power button.
 
-Commits use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `test:`, `chore:`). Keep the subject under 72 characters.
+Commits use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `test:`, `chore:`); pull requests are squash-merged, so the pull request title becomes the commit. Keep it under 72 characters.
 
 ## Style
 

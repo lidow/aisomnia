@@ -1,30 +1,78 @@
 name: Release
 
+# Full release automation:
+# 1. Runs after CI succeeds on main (or weekly, or by hand).
+# 2. release-please reads the Conventional Commits since the last tag and opens or updates the
+#    release pull request (next version + CHANGELOG.md).
+# 3. With the repository variable AUTO_RELEASE = "true" the workflow merges that pull request itself
+#    and release-please creates the tag and the GitHub release in the same run; otherwise merging the
+#    release pull request by hand does it.
+# 4. GoReleaser builds darwin/arm64 + darwin/amd64, attaches archives and checksums to the release and
+#    pushes the Homebrew formula to lidow/homebrew-tap with a deploy key (secret HOMEBREW_TAP_DEPLOY_KEY).
+
 on:
-  push:
-    tags: ["v*"]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
 
 permissions:
   contents: write
+  pull-requests: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
+  release-please:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.first.outputs.release_created || steps.second.outputs.release_created }}
+      tag_name: ${{ steps.first.outputs.tag_name || steps.second.outputs.tag_name }}
+    steps:
+      - id: first
+        uses: googleapis/release-please-action@v5
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+      - id: merge
+        if: vars.AUTO_RELEASE == 'true' && steps.first.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ fromJSON(steps.first.outputs.pr).number }}
+        run: gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+      - id: second
+        if: steps.merge.outcome == 'success'
+        uses: googleapis/release-please-action@v5
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
   goreleaser:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ needs.release-please.outputs.tag_name }}
       - uses: actions/setup-go@v7
         with:
           go-version: stable
-      - name: Test before releasing
-        run: go test -count=1 ./...
+      - name: Test before publishing
+        run: go vet ./... && go test -count=1 ./...
       - uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
           version: "~> v2"
-          # Without HOMEBREW_TAP_TOKEN the release is still published; only the tap formula is skipped.
-          args: release --clean ${{ secrets.HOMEBREW_TAP_TOKEN == '' && '--skip=homebrew' || '' }}
+          # Without the deploy key the release is still published; only the formula is skipped.
+          args: release --clean ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY == '' && '--skip=homebrew' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          HOMEBREW_TAP_DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}

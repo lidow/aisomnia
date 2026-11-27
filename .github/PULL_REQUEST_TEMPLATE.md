@@ -12,5 +12,5 @@
 
 - [ ] Every new system command goes through the `Runner` interface and is covered by a test
 - [ ] Any new setting is reversible by `aisomnia reset`
-- [ ] `CHANGELOG.md` has a line under `Unreleased`
+- [ ] The pull request title is a Conventional Commit (`feat: …`, `fix: …`); it becomes the changelog entry
 - [ ] Documentation updated (README, `docs/profile.md`, `docs/states.md`) if behavior changed

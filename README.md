@@ -134,7 +134,7 @@ make vuln     # govulncheck
 make build    # ./aisomnia
 ```
 
-Unit tests never touch macOS: every command runs through one `Runner` interface and the tests inject a fake. See [CONTRIBUTING.md](CONTRIBUTING.md). Releases are cut by tagging (`vX.Y.Z`); GitHub Actions builds the binaries, publishes the release and updates the Homebrew formula. See [docs/releasing.md](docs/releasing.md).
+Unit tests never touch macOS: every command runs through one `Runner` interface and the tests inject a fake. See [CONTRIBUTING.md](CONTRIBUTING.md). Releases are automatic: Conventional Commits on `main` drive the version and the changelog, and GitHub Actions publishes the release and updates the Homebrew formula. See [docs/releasing.md](docs/releasing.md).
 
 ## License
 
