@@ -34,4 +34,4 @@ homebrew-tap/
     aisomnia.rb      # written by GoReleaser on every release
 ```
 
-Users install with `brew install lidow/tap/aisomnia`. The formula also offers `brew services start aisomnia` to run the lid watcher.
+Users install with `brew install lidow/tap/aisomnia`; the fully qualified name also grants Homebrew's tap trust for that one formula (README → Homebrew tap trust). The formula also offers `brew services start aisomnia` to run the lid watcher.
