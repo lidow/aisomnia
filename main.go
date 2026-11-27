@@ -37,7 +37,7 @@ Usage:
   aisomnia version
 
 Options (before the verb):
-  --profile PATH   use this profile (or WAKEFUL_PROFILE); default ~/.config/aisomnia/profile.toml
+  --profile PATH   use this profile (or AISOMNIA_PROFILE); default ~/.config/aisomnia/profile.toml
                    when it exists, else the built-in profile
 
 Exit codes: 0 ok / no drift · 1 drift or a command failed · 2 usage
@@ -103,7 +103,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 
 	home, _ := os.UserHomeDir()
-	path := resolveProfilePath(profileFlag, os.Getenv("WAKEFUL_PROFILE"), home)
+	path := resolveProfilePath(profileFlag, os.Getenv("AISOMNIA_PROFILE"), home)
 	profile, err := loadProfile(path)
 	if err != nil {
 		fmt.Fprintf(stderr, "%s: %v\n", appName, err)

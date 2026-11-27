@@ -1,6 +1,6 @@
 # Profile reference
 
-The profile is a TOML file. `aisomnia` ships a built-in default; `aisomnia profile` prints the active one, `aisomnia profile --init` writes an editable copy to `~/.config/aisomnia/profile.toml` (or `$XDG_CONFIG_HOME/aisomnia/profile.toml`). Precedence: `--profile PATH`, then `WAKEFUL_PROFILE`, then the user copy, then the built-in default. Unknown keys are rejected so a typo cannot silently do nothing.
+The profile is a TOML file. `aisomnia` ships a built-in default; `aisomnia profile` prints the active one, `aisomnia profile --init` writes an editable copy to `~/.config/aisomnia/profile.toml` (or `$XDG_CONFIG_HOME/aisomnia/profile.toml`). Precedence: `--profile PATH`, then `AISOMNIA_PROFILE`, then the user copy, then the built-in default. Unknown keys are rejected so a typo cannot silently do nothing.
 
 ## `[pmset.battery]` and `[pmset.ac]`
 

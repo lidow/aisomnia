@@ -14,7 +14,7 @@ func userProfilePath(home string) string {
 	return filepath.Join(home, ".config", appName, "profile.toml")
 }
 
-// resolveProfilePath picks the profile: --profile, then WAKEFUL_PROFILE, then the user copy when it
+// resolveProfilePath picks the profile: --profile, then AISOMNIA_PROFILE, then the user copy when it
 // exists, else "" for the built-in profile.
 func resolveProfilePath(flag, env, home string) string {
 	if flag != "" {
