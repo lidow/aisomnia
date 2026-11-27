@@ -1,0 +1,80 @@
+# GoReleaser configuration: https://goreleaser.com
+version: 2
+
+project_name: aisomnia
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: aisomnia
+    main: .
+    binary: aisomnia
+    env: [CGO_ENABLED=0]
+    goos: [darwin]
+    goarch: [arm64, amd64]
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: tarball
+    formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+      - docs/*
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^chore\\(deps\\)"
+      - "^chore\\(ci\\)"
+      - "^docs:"
+      - "^test:"
+
+release:
+  github:
+    owner: lidow
+    name: aisomnia
+  draft: false
+  prerelease: auto
+
+brews:
+  - name: aisomnia
+    repository:
+      owner: lidow
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    commit_author:
+      name: aisomnia-release-bot
+      email: aisomnia-release-bot@users.noreply.github.com
+    commit_msg_template: "aisomnia {{ .Tag }}"
+    homepage: https://github.com/lidow/aisomnia
+    description: "Keep your Mac awake for the work, locked for compliance, asleep when the lid closes"
+    license: MIT
+    # Maintained by DevJestic
+    install: |
+      bin.install "aisomnia"
+    service: |
+      run [opt_bin/"aisomnia", "lidwatch", "run"]
+      keep_alive true
+      process_type :background
+      log_path var/"log/aisomnia.log"
+      error_log_path var/"log/aisomnia.log"
+    caveats: |
+      Apply the profile once:
+        aisomnia apply
+      The lid watcher is started by `aisomnia apply`, or run it through launchd via Homebrew instead:
+        brew services start aisomnia
+    test: |
+      system "#{bin}/aisomnia", "version"

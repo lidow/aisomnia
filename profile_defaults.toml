@@ -1,0 +1,36 @@
+# Baseline profile for `aisomnia reset`: the macOS laptop values measured on a MacBook Pro (Apple
+# silicon, macOS 27) before aisomnia changed anything. The power-button keys are absent here, which
+# means "deleted"; the lid watcher is stopped.
+name = "macOS baseline"
+
+[pmset.battery]
+sleep = 1
+displaysleep = 10
+disksleep = 10
+tcpkeepalive = 1
+womp = 0
+powernap = 1
+standby = 1
+hibernatemode = 3
+
+[pmset.ac]
+sleep = 1
+displaysleep = 10
+disksleep = 10
+tcpkeepalive = 1
+womp = 1
+powernap = 1
+standby = 1
+hibernatemode = 3
+
+[power_button]
+# no keys: reset deletes "Sleep On Power Button" and PowerButtonSleepsSystem
+
+[screen]
+saver_idle_seconds = 300
+lock_delay = "immediate"
+
+[lidwatch]
+enabled = false
+poll_seconds = 2
+battery_floor_percent = 20

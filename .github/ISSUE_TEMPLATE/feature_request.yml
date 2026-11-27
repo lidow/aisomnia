@@ -1,0 +1,22 @@
+name: Feature request
+description: A rule, verb or hold aisomnia should have
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The situation
+      description: What you are trying to do on your Mac and what gets in the way today
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like aisomnia to do
+    validations:
+      required: true
+  - type: textarea
+    id: macos
+    attributes:
+      label: How macOS exposes it
+      description: If you know the `pmset`, `defaults` or other command behind it, say so

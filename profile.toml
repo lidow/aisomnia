@@ -1,0 +1,45 @@
+# aisomnia — declared power profile. This file is the single source of truth for every setting
+# aisomnia manages. Edit a copy at ~/.config/aisomnia/profile.toml (`aisomnia profile --init`) or pass
+# --profile PATH. Reference: docs/profile.md
+name = "aisomnia default"
+
+# pmset values per power source. A key that `pmset -g custom` does not list on your Mac is reported
+# as UNSUPPORTED and skipped by apply.
+[pmset.battery]
+sleep = 0           # never sleep on idle
+displaysleep = 5    # display off after 5 minutes
+disksleep = 10
+tcpkeepalive = 1    # keep TCP sessions alive
+womp = 0            # no wake on LAN on battery
+lidwake = 1
+powernap = 1
+standby = 1
+hibernatemode = 3
+
+[pmset.ac]
+sleep = 0           # never sleep on idle
+displaysleep = 30   # display off after 30 minutes
+disksleep = 10
+tcpkeepalive = 1
+womp = 1            # wake on LAN while on power
+lidwake = 1
+powernap = 1
+standby = 1
+hibernatemode = 3
+
+# Power button: a short press turns the display off and locks instead of sleeping. Both keys are plain
+# preference keys and reversible; the first needs a restart, the second a log out and in.
+[power_button]
+sleep_on_power_button = 0          # /Library/Preferences/com.apple.PowerManagement.plist "Sleep On Power Button"
+loginwindow_sleeps_system = false  # /Library/Preferences/com.apple.loginwindow PowerButtonSleepsSystem
+
+# Screen saver and lock: lock within 5 minutes of inactivity, authentication to unlock.
+[screen]
+saver_idle_seconds = 300   # defaults -currentHost write com.apple.screensaver idleTime
+lock_delay = "immediate"   # sysadminctl -screenLock immediate -password - (macOS asks for your password)
+
+# Lid watcher: sleeps the Mac on lid close, also with an external display and power attached.
+[lidwatch]
+enabled = true
+poll_seconds = 2
+battery_floor_percent = 20   # a lid hold ends on its own at this battery level

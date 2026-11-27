@@ -1,0 +1,32 @@
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+    - ineffassign
+    - misspell
+    - gosec
+    - revive
+    - unconvert
+    - unparam
+    - nolintlint
+  settings:
+    gosec:
+      excludes:
+        - G204 # subprocess launched with variable: every command here is built from the profile on purpose
+        - G301 # directory permissions 0755 are intended for ~/.config and ~/Library paths
+        - G306 # file permissions 0644 are intended for plists, logs and hold files
+    misspell:
+      locale: US
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters: [gosec, errcheck]
+
+formatters:
+  enable:
+    - gofmt
