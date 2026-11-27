@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.2](https://github.com/lidow/aisomnia/compare/v0.1.1...v0.1.2) (2026-11-27)
+
+
+### Bug fixes
+
+* **ci:** push a fresh release commit with the deploy key so CI always runs ([#18](https://github.com/lidow/aisomnia/issues/18)) ([38bc4ea](https://github.com/lidow/aisomnia/commit/38bc4eaf281cd88c8ab03374612a96e045590d39))
+* ignore pmset settings the Mac does not offer ([#17](https://github.com/lidow/aisomnia/issues/17)) ([ff18ec5](https://github.com/lidow/aisomnia/commit/ff18ec596768bf4523817fc84719ce5d893a487f))
+
+
+### Documentation
+
+* explain Homebrew tap trust for lidow/tap ([#15](https://github.com/lidow/aisomnia/issues/15)) ([8835380](https://github.com/lidow/aisomnia/commit/88353808eb4265580da8a378c5c1b76f1ce95cd2))
+
 ## [0.1.1](https://github.com/lidow/aisomnia/compare/v0.1.0...v0.1.1) (2026-11-27)
 
 
