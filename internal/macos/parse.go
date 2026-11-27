@@ -39,6 +39,23 @@ func ParsePmsetCustom(out string) map[string]map[string]string {
 	return res
 }
 
+// ParsePmsetCap reads `pmset -g cap`: the settings this Mac accepts. It returns nil when the output
+// lists none, so callers can fall back to what `pmset -g custom` shows.
+func ParsePmsetCap(out string) map[string]bool {
+	keys := map[string]bool{}
+	for _, line := range strings.Split(out, "\n") {
+		t := strings.TrimSpace(line)
+		if t == "" || strings.HasSuffix(t, ":") || strings.Contains(t, " ") {
+			continue
+		}
+		keys[t] = true
+	}
+	if len(keys) == 0 {
+		return nil
+	}
+	return keys
+}
+
 // ParseDefaults interprets a `defaults read` result: (value, set). A missing key is ("", false).
 func ParseDefaults(out string, err error) (string, bool) {
 	if err != nil {

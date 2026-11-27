@@ -4,7 +4,7 @@ The profile is a TOML file. `aisomnia` ships a built-in default; `aisomnia profi
 
 ## `[pmset.battery]` and `[pmset.ac]`
 
-Integer values passed to `pmset -b` (battery) and `pmset -c` (AC). A key that `pmset -g custom` does not list on your Mac is reported as `UNSUPPORTED` and skipped by `apply`.
+Integer values passed to `pmset -b` (battery) and `pmset -c` (AC). A key your Mac does not offer (`pmset -g cap` does not list it) is ignored: `status` does not show it and `apply` does not touch it. Example: `lidwake` on Apple silicon MacBooks, which always wake when the lid opens. If the capability list cannot be read, such a key is shown as `UNSUPPORTED` and skipped.
 
 | Key | Default (battery / AC) | Meaning |
 |---|---|---|
@@ -13,7 +13,7 @@ Integer values passed to `pmset -b` (battery) and `pmset -c` (AC). A key that `p
 | `disksleep` | 10 / 10 | Minutes before disks spin down (irrelevant for SSDs). |
 | `tcpkeepalive` | 1 / 1 | Keep TCP connections alive during sleep. |
 | `womp` | 0 / 1 | Wake on LAN. |
-| `lidwake` | 1 / 1 | Wake when the lid opens. Not listed on some macOS versions. |
+| `lidwake` | 1 / 1 | Wake when the lid opens. Intel Macs only; Apple silicon always wakes on lid open, so the key is ignored there. |
 | `powernap` | 1 / 1 | Short maintenance wakes during sleep. |
 | `standby` | 1 / 1 | Move to standby (RAM off) after a long sleep. |
 | `hibernatemode` | 3 / 3 | 3 keeps RAM powered and writes an image; 25 writes the image and powers RAM off. |
