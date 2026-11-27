@@ -3,8 +3,8 @@
 # --profile PATH. Reference: docs/profile.md
 name = "aisomnia default"
 
-# pmset values per power source. A key that `pmset -g custom` does not list on your Mac is reported
-# as UNSUPPORTED and skipped by apply.
+# pmset values per power source. Keys your Mac does not offer (`pmset -g cap`) are ignored, for
+# example lidwake on Apple silicon, which always wakes when the lid opens.
 [pmset.battery]
 sleep = 0           # never sleep on idle
 displaysleep = 5    # display off after 5 minutes

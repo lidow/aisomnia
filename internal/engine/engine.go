@@ -86,12 +86,15 @@ func Assess(p *profile.Profile, live *macos.Live, lidHold bool, w Watcher) ([]Ro
 		}
 		liveSrc := live.Pmset[src.name]
 		for _, key := range profile.OrderedKeys(declared) {
+			if live.PmsetCap != nil && !live.PmsetCap[key] {
+				continue // this Mac does not offer the setting (e.g. lidwake on Apple silicon): not managed here
+			}
 			want := strconv.Itoa(declared[key])
 			have, ok := liveSrc[key]
 			row := Row{Setting: "pmset " + src.name + " " + key, Declared: want, Live: have}
 			switch {
 			case !ok:
-				row.Live, row.State, row.Note = "-", StateUnsupported, "not listed by pmset -g custom on this Mac; skipped"
+				row.Live, row.State, row.Note = "-", StateUnsupported, "not reported by pmset on this Mac; skipped"
 			case have == want:
 				row.State = StateOK
 			default:

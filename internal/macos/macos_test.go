@@ -29,6 +29,16 @@ func TestParsePmsetCustom(t *testing.T) {
 	}
 }
 
+func TestParsePmsetCap(t *testing.T) {
+	c := macos.ParsePmsetCap(read(t, "pmset-cap-apple-silicon.txt"))
+	if !c["displaysleep"] || !c["womp"] || c["lidwake"] {
+		t.Fatalf("%v", c)
+	}
+	if macos.ParsePmsetCap("") != nil {
+		t.Fatal("no capabilities listed must mean unknown (nil)")
+	}
+}
+
 func TestParseScreenLock(t *testing.T) {
 	cases := map[string]string{
 		read(t, "sysadminctl-screenlock.txt"): "immediate",

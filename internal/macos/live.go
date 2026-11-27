@@ -13,6 +13,7 @@ const (
 // Live is everything status compares the profile against.
 type Live struct {
 	Pmset              map[string]map[string]string
+	PmsetCap           map[string]bool // settings this Mac accepts (`pmset -g cap`); nil when unknown
 	SleepOnPowerButton *string
 	LoginwindowSleeps  *string
 	SaverIdle          *string
@@ -29,6 +30,9 @@ func ReadLive(r Runner, uid, agentLabel string) (*Live, error) {
 		return nil, err
 	}
 	live := &Live{Pmset: ParsePmsetCustom(out)}
+	if capOut, err := r.Run("pmset", "-g", "cap"); err == nil {
+		live.PmsetCap = ParsePmsetCap(capOut)
+	}
 	if v, ok := ParseDefaults(r.Run("defaults", "read", PowerManagementPlist, SleepOnPowerButton)); ok {
 		live.SleepOnPowerButton = &v
 	}

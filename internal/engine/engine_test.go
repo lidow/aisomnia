@@ -73,6 +73,27 @@ func TestAssessOrderAndUnsupported(t *testing.T) {
 	}
 }
 
+func TestAssessSkipsSettingsTheMacDoesNotOffer(t *testing.T) {
+	b, err := os.ReadFile("../macos/testdata/pmset-cap-apple-silicon.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	live := baselineLive(t)
+	live.PmsetCap = macos.ParsePmsetCap(string(b))
+	rows, cmds := engine.Assess(mustDefault(t), live, false, &nopWatcher{})
+	for _, r := range rows {
+		if strings.Contains(r.Setting, "lidwake") {
+			t.Fatalf("lidwake is not offered on this Mac and must not be listed: %+v", r)
+		}
+		if r.State == engine.StateUnsupported {
+			t.Fatalf("no unsupported rows expected when the capabilities are known: %+v", r)
+		}
+	}
+	if len(cmds) != 7 {
+		t.Fatalf("the commands must not change: %v", strs(cmds))
+	}
+}
+
 func TestAssessNoDrift(t *testing.T) {
 	live := baselineLive(t)
 	for _, src := range []string{"battery", "ac"} {
