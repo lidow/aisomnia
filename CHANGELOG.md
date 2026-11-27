@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/lidow/aisomnia/compare/v0.1.0...v0.1.1) (2026-11-27)
+
+
+### Bug fixes
+
+* read the profile path from AISOMNIA_PROFILE ([#9](https://github.com/lidow/aisomnia/issues/9)) ([9fa7d2c](https://github.com/lidow/aisomnia/commit/9fa7d2cf4d373d386b2ac6b706072445137cbe23))
+
 ## 0.1.0 (2026-11-27)
 
 
