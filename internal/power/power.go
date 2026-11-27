@@ -92,10 +92,10 @@ func Hibernate(r macos.Runner, restoreMode int, stateDir string, out io.Writer) 
 	return nil
 }
 
-// waitForWake returns when the wall clock jumps (the process was frozen during sleep) or after max.
-var waitForWake = func(max time.Duration) {
+// waitForWake returns when the wall clock jumps (the process was frozen during sleep) or after limit.
+var waitForWake = func(limit time.Duration) {
 	start := time.Now()
-	for time.Since(start) < max {
+	for time.Since(start) < limit {
 		before := time.Now()
 		time.Sleep(5 * time.Second)
 		if time.Since(before) > 20*time.Second {
