@@ -43,13 +43,17 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
       - id: merge
-        if: vars.AUTO_RELEASE == 'true' && steps.first.outputs.pr != ''
+        if: vars.AUTO_RELEASE == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          PR: ${{ fromJSON(steps.first.outputs.pr || '{}').number }}
-          BRANCH: ${{ fromJSON(steps.first.outputs.pr || '{}').headBranchName }}
         run: |
+          # release-please reports a release pull request only in the run that creates or updates it,
+          # so look up the pending one directly.
+          pr=$(gh pr list --state open --label "autorelease: pending" --json number,headRefName -q '.[0] | "\(.number) \(.headRefName)"')
+          if [ -z "$pr" ]; then echo "no pending release pull request"; exit 0; fi
+          set -- $pr
+          PR=$1 BRANCH=$2
           # main requires CI; a pull request opened with the workflow token gets none, so start it here.
           gh workflow run ci.yml --ref "$BRANCH"
           for _ in $(seq 1 60); do
@@ -59,8 +63,9 @@ jobs:
           done
           gh pr checks "$PR" --required --watch --fail-fast --interval 15
           gh pr merge "$PR" --squash --delete-branch
+          echo "merged=true" >> "$GITHUB_OUTPUT"
       - id: second
-        if: steps.merge.outcome == 'success'
+        if: steps.merge.outputs.merged == 'true'
         uses: googleapis/release-please-action@v5
         with:
           config-file: release-please-config.json
