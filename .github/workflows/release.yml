@@ -68,6 +68,9 @@ jobs:
           git fetch origin "$BRANCH"
           git checkout -B "$BRANCH" "origin/$BRANCH"
           git rebase origin/main
+          # Always push a new commit with the deploy key: when release-please already based the branch on main,
+          # the rebase is a no-op, the head is the GITHUB_TOKEN commit and no CI runs for it.
+          git commit --amend --no-edit --allow-empty
           git push --force-with-lease origin "$BRANCH"
           head=$(git rev-parse HEAD)
           for _ in $(seq 1 90); do
