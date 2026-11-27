@@ -158,7 +158,7 @@ func (a *app) cmdHold(args []string) error {
 	select {
 	case <-sig:
 		_ = cmd.Process.Signal(syscall.SIGTERM)
-		<-done //nolint:errcheck // the hold process was just signalled; its exit error is expected
+		<-done //nolint:errcheck // the hold process was just signaled; its exit error is expected
 		fmt.Fprintf(a.stdout, "hold %s released\n", kind)
 		return nil
 	case err := <-done:
