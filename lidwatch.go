@@ -56,11 +56,11 @@ func (a *app) logLine(format string, args ...any) {
 	if st, err := os.Stat(a.logPath()); err == nil && st.Size() > logMaxBytes {
 		_ = os.Rename(a.logPath(), a.logPath()+".1")
 	}
-	f, err := os.OpenFile(a.logPath(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	f, err := os.OpenFile(a.logPath(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
 	if err != nil {
 		return
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	fmt.Fprintf(f, "%s %s\n", time.Now().Format("2006-01-02 15:04:05"), fmt.Sprintf(format, args...))
 }
 
@@ -94,8 +94,8 @@ func (a *app) lidwatchStart() error {
 	if err != nil {
 		return err
 	}
-	if real, err := filepath.EvalSymlinks(exe); err == nil {
-		exe = real
+	if resolved, err := filepath.EvalSymlinks(exe); err == nil {
+		exe = resolved
 	}
 	_ = os.MkdirAll(a.logDir(), 0o755)
 	profileArgs := ""

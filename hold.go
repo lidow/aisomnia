@@ -148,7 +148,7 @@ func (a *app) cmdHold(args []string) error {
 		_ = cmd.Process.Signal(syscall.SIGTERM)
 		return err
 	}
-	defer os.Remove(path)
+	defer func() { _ = os.Remove(path) }()
 	fmt.Fprintf(a.stdout, "hold %s for %s (until %s): %s. Ctrl-C ends it early.\n", kind, d, h.Expires.Format("15:04:05"), what)
 
 	sig := make(chan os.Signal, 1)

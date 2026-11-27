@@ -15,11 +15,20 @@ linters:
     - unparam
     - nolintlint
   settings:
+    errcheck:
+      exclude-functions:
+        # Terminal output: a failed write to stdout/stderr has nowhere better to be reported.
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - (*text/tabwriter.Writer).Flush
     gosec:
       excludes:
-        - G204 # subprocess launched with variable: every command here is built from the profile on purpose
-        - G301 # directory permissions 0755 are intended for ~/.config and ~/Library paths
-        - G306 # file permissions 0644 are intended for plists, logs and hold files
+        - G204 # subprocess with variable arguments: every command is built from the profile on purpose
+        - G702 # same, taint analysis: durations and kinds are validated before they reach caffeinate/sudo
+        - G304 # file path from a variable: reading the profile the user names is the feature
+        - G301 # 0755 directories under ~/.config and ~/Library are intended
+        - G306 # 0644 for plists and hold files is intended (logs are 0600)
     misspell:
       locale: US
   exclusions:
