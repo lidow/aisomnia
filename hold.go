@@ -158,7 +158,7 @@ func (a *app) cmdHold(args []string) error {
 	select {
 	case <-sig:
 		_ = cmd.Process.Signal(syscall.SIGTERM)
-		<-done
+		_ = <-done
 		fmt.Fprintf(a.stdout, "hold %s released\n", kind)
 		return nil
 	case err := <-done:

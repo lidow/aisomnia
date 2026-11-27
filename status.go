@@ -262,7 +262,7 @@ func (a *app) cmdStatus(args []string) error {
 		for _, r := range rows {
 			fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\n", r.Setting, r.Declared, r.Live, strings.ToUpper(r.State), r.Note)
 		}
-		tw.Flush()
+		_ = tw.Flush()
 		for _, h := range active {
 			fmt.Fprintf(a.stdout, "hold: %s until %s (pid %d)\n", h.Kind, h.Expires.Format("15:04:05"), h.PID)
 		}
