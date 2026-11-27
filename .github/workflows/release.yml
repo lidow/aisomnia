@@ -4,9 +4,10 @@ name: Release
 # 1. Runs after CI succeeds on main (or weekly, or by hand).
 # 2. release-please reads the Conventional Commits since the last tag and opens or updates the
 #    release pull request (next version + CHANGELOG.md).
-# 3. With the repository variable AUTO_RELEASE = "true" the workflow starts CI on the release branch,
-#    waits for the checks main requires, merges the pull request, and release-please creates the tag
-#    and the GitHub release in the same run; otherwise merging the release pull request by hand does it.
+# 3. With the repository variable AUTO_RELEASE = "true" the workflow rebases the release branch onto
+#    main and pushes it with a deploy key (secret RELEASE_DEPLOY_KEY) so the pull request's CI runs,
+#    waits for the checks main requires, merges it, and release-please creates the tag and the GitHub
+#    release in the same run; otherwise merging the release pull request by hand does it.
 # 4. GoReleaser builds darwin/arm64 + darwin/amd64, attaches archives and checksums to the release and
 #    pushes the Homebrew formula to lidow/homebrew-tap with a deploy key (secret HOMEBREW_TAP_DEPLOY_KEY).
 
@@ -20,7 +21,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  actions: write        # dispatch CI on the release branch
   checks: read
   contents: write
   pull-requests: write
@@ -42,6 +42,12 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+      - name: Check out with the release deploy key
+        if: vars.AUTO_RELEASE == 'true'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
       - id: merge
         if: vars.AUTO_RELEASE == 'true'
         env:
@@ -54,14 +60,18 @@ jobs:
           if [ -z "$pr" ]; then echo "no pending release pull request"; exit 0; fi
           set -- $pr
           PR=$1 BRANCH=$2
-          # Bring the release branch up to date first: workflow_dispatch reads ci.yml from that branch,
-          # and the checks must run against what main holds now.
-          gh pr update-branch "$PR" --rebase || true
-          sleep 5
-          # main requires CI; a pull request opened with the workflow token gets none, so start it here.
-          gh workflow run ci.yml --ref "$BRANCH"
-          for _ in $(seq 1 60); do
-            n=$(gh pr checks "$PR" --required --json name -q 'length' 2>/dev/null || echo 0)
+          # main requires CI checks, and a pull request opened with the workflow token gets none.
+          # Rebase the release branch onto main and push it with the deploy key: that push triggers
+          # the pull request's CI like any contributor's push (the ruleset still keeps the key off main).
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$BRANCH"
+          git checkout -B "$BRANCH" "origin/$BRANCH"
+          git rebase origin/main
+          git push --force-with-lease origin "$BRANCH"
+          head=$(git rev-parse HEAD)
+          for _ in $(seq 1 90); do
+            n=$(gh api "repos/$GH_REPO/commits/$head/check-runs" -q '[.check_runs[] | select(.name=="Test (macos-latest)" or .name=="Test (macos-15)" or .name=="golangci-lint" or .name=="govulncheck")] | length')
             [ "${n:-0}" -ge 4 ] && break
             sleep 10
           done
