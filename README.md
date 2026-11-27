@@ -42,6 +42,23 @@ Homebrew tap (macOS 14 or later, Apple silicon and Intel):
 brew install lidow/tap/aisomnia
 ```
 
+### Homebrew tap trust
+
+Since Homebrew 6.0, formulae from taps outside Homebrew itself load only after you trust them, because a formula is Ruby code that runs with your user's privileges ([Tap Trust](https://docs.brew.sh/Tap-Trust)).
+
+- **Full name, as above.** `brew install lidow/tap/aisomnia` trusts exactly this formula and nothing else from the tap. Later `brew upgrade` runs keep working.
+- **Short name.** If you tapped first and want `brew install aisomnia`, trust the formula yourself:
+
+  ```sh
+  brew tap lidow/tap
+  brew trust --formula lidow/tap/aisomnia
+  brew install aisomnia
+  ```
+
+- **Whole tap.** `brew trust lidow/tap` would also trust every formula added to the tap later. The tap holds only aisomnia today, but trusting the single formula is the safer habit.
+
+If Homebrew says it is "ignoring formulae … from these taps because tap trust is required" and lists `lidow/tap`, run `brew trust --formula lidow/tap/aisomnia`. To remove the trust: `brew untrust --formula lidow/tap/aisomnia`.
+
 From source (Go 1.26 or later):
 
 ```sh
